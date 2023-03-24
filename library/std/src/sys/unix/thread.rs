@@ -5,6 +5,7 @@ use crate::mem;
 use crate::num::NonZeroUsize;
 use crate::ptr;
 use crate::sys::{os, stack_overflow};
+use crate::sys_common::thread;
 use crate::time::Duration;
 
 #[cfg(all(target_os = "linux", target_env = "gnu"))]
@@ -51,11 +52,11 @@ impl Thread {
     pub unsafe fn new(
         stack: usize,
         p: Box<dyn FnOnce()>,
-        options: Option<SpawnOptions>,
+        options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         let p = Box::into_raw(Box::new(p));
         let mut native: libc::pthread_t = mem::zeroed();
-        let mut attr = options.unwrap_or_default().attr;
+        let mut attr = options.native.unwrap_or_default().attr;
 
         #[cfg(target_os = "espidf")]
         if stack > 0 {

@@ -262,7 +262,7 @@ pub struct Builder {
     /// The size of the stack for the spawned thread in bytes
     stack_size: Option<usize>,
     /// Any OS-specific scheduling options to use when spawning the thread.
-    pub(crate) options: SpawnOptions,
+    pub(crate) options: thread::SpawnOptions,
 }
 
 impl Builder {
@@ -286,7 +286,7 @@ impl Builder {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new() -> Builder {
-        Builder { name: None, stack_size: None, options: SpawnOptions::default() }
+        Builder { name: None, stack_size: None, options: thread::SpawnOptions::default() }
     }
 
     /// Names the thread-to-be. Currently the name is used for identification
@@ -563,27 +563,12 @@ impl Builder {
                     mem::transmute::<Box<dyn FnOnce() + 'a>, Box<dyn FnOnce() + 'static>>(
                         Box::new(main),
                     ),
-                    options.native,
+                    options,
                 )?
             },
             thread: my_thread,
             packet: my_packet,
         })
-    }
-}
-
-/// Helper struct for storing OS-specific thread spawning options
-/// In the future, this could be used to pass along higher-level `Priority`
-/// or `Affinity` objects (as part of [`Builder`]'s public API) which would be
-/// used later in [`imp::Thread::new`].
-#[derive(Default)]
-pub(crate) struct SpawnOptions {
-    pub native: Option<imp::SpawnOptions>,
-}
-
-impl fmt::Debug for SpawnOptions {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("SpawnOptions").finish_non_exhaustive()
     }
 }
 

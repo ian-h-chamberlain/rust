@@ -8,6 +8,7 @@ use crate::num::NonZeroUsize;
 use crate::ptr;
 use crate::sys::hermit::abi;
 use crate::sys::hermit::thread_local_dtor::run_dtors;
+use crate::sys_common::thread;
 use crate::time::Duration;
 
 pub type Tid = abi::Tid;
@@ -59,7 +60,7 @@ impl Thread {
     pub unsafe fn new(
         stack: usize,
         p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOption>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         Thread::new_with_coreid(stack, p, -1 /* = no specific core */)
     }

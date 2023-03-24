@@ -5,6 +5,7 @@ use crate::io;
 use crate::mem;
 use crate::num::NonZeroUsize;
 use crate::sys::unsupported;
+use crate::sys_common::thread;
 use crate::time::Duration;
 
 pub struct Thread(!);
@@ -16,7 +17,7 @@ impl Thread {
     pub unsafe fn new(
         _stack: usize,
         _p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOptions>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         unsupported()
     }

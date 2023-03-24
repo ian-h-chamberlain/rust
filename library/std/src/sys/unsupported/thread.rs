@@ -13,7 +13,7 @@ impl Thread {
     pub unsafe fn new(
         _stack: usize,
         _p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOptions>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         unsupported()
     }

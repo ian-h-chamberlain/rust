@@ -6,6 +6,7 @@ use crate::ptr;
 use crate::sys::c;
 use crate::sys::handle::Handle;
 use crate::sys::stack_overflow;
+use crate::sys_common::thread;
 use crate::sys_common::FromInner;
 use crate::time::Duration;
 
@@ -24,7 +25,7 @@ impl Thread {
     pub unsafe fn new(
         stack: usize,
         p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOptions>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         let p = Box::into_raw(Box::new(p));
 

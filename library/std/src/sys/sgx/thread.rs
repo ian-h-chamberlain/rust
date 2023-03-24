@@ -3,6 +3,7 @@ use super::unsupported;
 use crate::ffi::CStr;
 use crate::io;
 use crate::num::NonZeroUsize;
+use crate::sys_common::thread;
 use crate::time::Duration;
 
 use super::abi::usercalls;
@@ -104,7 +105,7 @@ impl Thread {
     pub unsafe fn new(
         _stack: usize,
         p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOptions>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         let mut queue_lock = task_queue::lock();
         unsafe { usercalls::launch_thread()? };

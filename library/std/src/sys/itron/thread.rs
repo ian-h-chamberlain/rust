@@ -14,6 +14,7 @@ use crate::{
     ptr::NonNull,
     sync::atomic::{AtomicUsize, Ordering},
     sys::thread_local_dtor::run_dtors,
+    sys_common::thread,
     time::Duration,
 };
 
@@ -93,7 +94,7 @@ impl Thread {
     pub unsafe fn new(
         stack: usize,
         p: Box<dyn FnOnce()>,
-        _options: Option<SpawnOptions>,
+        _options: thread::SpawnOptions,
     ) -> io::Result<Thread> {
         let inner = Box::new(ThreadInner {
             start: UnsafeCell::new(ManuallyDrop::new(p)),

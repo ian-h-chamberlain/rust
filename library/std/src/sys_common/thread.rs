@@ -1,4 +1,5 @@
 use crate::env;
+use crate::fmt;
 use crate::sync::atomic::{self, Ordering};
 use crate::sys::thread as imp;
 
@@ -15,4 +16,20 @@ pub fn min_stack() -> usize {
     // initialization has run
     MIN.store(amt + 1, Ordering::Relaxed);
     amt
+}
+
+/// Helper struct for storing OS-specific thread spawning options
+/// In the future, this could be used to pass along higher-level `Priority`
+/// or `Affinity` objects (as part of [`Builder`]'s public API) which would be
+/// used later in [`imp::Thread::new`].
+// TODO: #84187 should this be in sys::common instead?
+#[derive(Default)]
+pub struct SpawnOptions {
+    pub native: Option<imp::SpawnOptions>,
+}
+
+impl fmt::Debug for SpawnOptions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SpawnOptions").finish_non_exhaustive()
+    }
 }
