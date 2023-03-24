@@ -48,11 +48,14 @@ unsafe impl Sync for Thread {}
 
 impl Thread {
     // unsafe: see thread::Builder::spawn_unchecked for safety requirements
-    pub unsafe fn new(stack: usize, p: Box<dyn FnOnce()>) -> io::Result<Thread> {
+    pub unsafe fn new(
+        stack: usize,
+        p: Box<dyn FnOnce()>,
+        options: Option<SpawnOptions>,
+    ) -> io::Result<Thread> {
         let p = Box::into_raw(Box::new(p));
         let mut native: libc::pthread_t = mem::zeroed();
-        let mut attr: libc::pthread_attr_t = mem::zeroed();
-        assert_eq!(libc::pthread_attr_init(&mut attr), 0);
+        let mut attr = options.unwrap_or_default().attr;
 
         #[cfg(target_os = "espidf")]
         if stack > 0 {
@@ -281,6 +284,20 @@ impl Drop for Thread {
     fn drop(&mut self) {
         let ret = unsafe { libc::pthread_detach(self.id) };
         debug_assert_eq!(ret, 0);
+    }
+}
+
+pub struct SpawnOptions {
+    pub attr: libc::pthread_attr_t,
+}
+
+impl Default for SpawnOptions {
+    fn default() -> Self {
+        unsafe {
+            let mut attr: libc::pthread_attr_t = mem::zeroed();
+            assert_eq!(libc::pthread_attr_init(&mut attr), 0);
+            Self { attr }
+        }
     }
 }
 

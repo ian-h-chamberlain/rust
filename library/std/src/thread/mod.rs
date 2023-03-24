@@ -257,10 +257,12 @@ pub use crate::sys::common::thread_local::Key as __LocalKeyInner;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[derive(Debug)]
 pub struct Builder {
-    // A name for the thread-to-be, for identification in panic messages
+    /// A name for the thread-to-be, for identification in panic messages
     name: Option<String>,
-    // The size of the stack for the spawned thread in bytes
+    /// The size of the stack for the spawned thread in bytes
     stack_size: Option<usize>,
+    /// Any OS-specific scheduling options to use when spawning the thread.
+    pub(crate) options: SpawnOptions,
 }
 
 impl Builder {
@@ -284,7 +286,7 @@ impl Builder {
     /// ```
     #[stable(feature = "rust1", since = "1.0.0")]
     pub fn new() -> Builder {
-        Builder { name: None, stack_size: None }
+        Builder { name: None, stack_size: None, options: SpawnOptions::default() }
     }
 
     /// Names the thread-to-be. Currently the name is used for identification
@@ -464,7 +466,7 @@ impl Builder {
         T: Send + 'a,
         'scope: 'a,
     {
-        let Builder { name, stack_size } = self;
+        let Builder { name, stack_size, options } = self;
 
         let stack_size = stack_size.unwrap_or_else(thread::min_stack);
 
@@ -561,11 +563,27 @@ impl Builder {
                     mem::transmute::<Box<dyn FnOnce() + 'a>, Box<dyn FnOnce() + 'static>>(
                         Box::new(main),
                     ),
+                    options.native,
                 )?
             },
             thread: my_thread,
             packet: my_packet,
         })
+    }
+}
+
+/// Helper struct for storing OS-specific thread spawning options
+/// In the future, this could be used to pass along higher-level `Priority`
+/// or `Affinity` objects (as part of [`Builder`]'s public API) which would be
+/// used later in [`imp::Thread::new`].
+#[derive(Default)]
+pub(crate) struct SpawnOptions {
+    pub native: Option<imp::SpawnOptions>,
+}
+
+impl fmt::Debug for SpawnOptions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SpawnOptions").finish_non_exhaustive()
     }
 }
 

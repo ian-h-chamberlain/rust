@@ -56,7 +56,11 @@ impl Thread {
         }
     }
 
-    pub unsafe fn new(stack: usize, p: Box<dyn FnOnce()>) -> io::Result<Thread> {
+    pub unsafe fn new(
+        stack: usize,
+        p: Box<dyn FnOnce()>,
+        _options: Option<SpawnOption>,
+    ) -> io::Result<Thread> {
         Thread::new_with_coreid(stack, p, -1 /* = no specific core */)
     }
 
@@ -97,6 +101,8 @@ impl Thread {
         id
     }
 }
+
+pub struct SpawnOptions;
 
 pub fn available_parallelism() -> io::Result<NonZeroUsize> {
     unsupported()
