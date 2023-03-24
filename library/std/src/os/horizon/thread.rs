@@ -1,7 +1,12 @@
 #![unstable(feature = "os_thread_scheduling", issue = "none")]
 
+/// Horizon-specific extension trait for [`thread::Builder`](crate::thread::Builder).
 pub trait BuilderExt {
-    fn priority(self, prio: libc::c_int) -> Self;
+    /// Set the priority of the thread to be spawned.
+    ///
+    /// See <https://www.3dbrew.org/wiki/Multi-threading#Threads> for details
+    /// about the meaning / valid values of the `priority` parameter.
+    fn priority(self, priority: libc::c_int) -> Self;
 }
 
 impl BuilderExt for crate::thread::Builder {
